@@ -106,9 +106,16 @@ python run_demo.py
 python run_demo.py --headed
 ```
 
-### Grabar una URL o SaaS externo real:
+### Grabar cualquier URL en vivo con Cursor Humano:
+Puedes enviar cualquier enlace web para que el bot lo explore y grabe con movimientos de mouse humanos (curvas Bézier, ondas de clic y scroll suave):
 ```bash
-python run_demo.py --url "https://app.ejemplo.com" --config config/default_workflow.yaml
+python record_url.py --url "https://whop.com/blog/whop-clips/"
+```
+*(Opcional: `--title "Mi Título"` `--banner "🔥 Oferta Especial"`)*
+
+### Grabar una URL con Workflow Declarativo:
+```bash
+python run_demo.py --url "https://app.ejemplo.com" --config config/whop_clips_live.yaml
 ```
 
 ---
