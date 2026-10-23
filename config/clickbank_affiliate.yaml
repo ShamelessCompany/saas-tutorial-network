@@ -1,0 +1,67 @@
+title: "Cómo Ganar Comisiones con ClickBank y Software de Afiliados"
+slug: "clickbank"
+mock_dir: "clickbank"
+saas_name: "ClickBank Marketplace"
+version: "1.0.0"
+
+affiliate:
+  code: "CLICKPRO75"
+  discount: "75% Comisión"
+  link: "https://shameless_pro.aivideo.hop.clickbank.net/?tid=yt_tutorial"
+  banner_text: "🔥 75% Comisión Recurrente • Enlace Oficial en Descripción"
+
+narration:
+  enabled: true
+  voice: "es-ES-AlvaroNeural"
+  script_parts:
+    hook: "¿Quieres ganar comisiones diarias recomendando herramientas digitales sin crear tu propio producto?"
+    problem: "Muchos eligen productos equivocados que no convierten y terminan perdiendo tiempo y dinero."
+    solution: "Hoy te muestro cómo filtrar las ofertas con más del 70% de comisión en ClickBank y generar tu Hoplink en dos clics."
+    cta: "Tienes el enlace oficial y la guía completa gratuita en la descripción y primer comentario fijado."
+
+viewport:
+  width: 1920
+  height: 1080
+
+steps:
+  - action: "wait"
+    duration_ms: 1500
+    callout: "Paso 1: Entrar al Marketplace de ClickBank"
+
+  - action: "hover"
+    selector: "#filter-high-gravity"
+    duration_ms: 1000
+
+  - action: "click"
+    selector: "#filter-high-gravity"
+    duration_ms: 1200
+    callout: "Paso 2: Filtrar por mayor gravedad y ventas"
+
+  - action: "hover"
+    selector: "#btn-promote-ai"
+    duration_ms: 1000
+
+  - action: "click"
+    selector: "#btn-promote-ai"
+    duration_ms: 1500
+    callout: "Paso 3: Seleccionar producto ganador ($142 por venta)"
+
+  - action: "click"
+    selector: "input[name='affiliate_nickname']"
+    duration_ms: 500
+
+  - action: "type"
+    selector: "input[name='affiliate_nickname']"
+    text: "shameless_pro"
+    delay_ms: 50
+    duration_ms: 1200
+    callout: "Paso 4: Ingresar ID de afiliado"
+
+  - action: "hover"
+    selector: "#btn-generate-hoplink"
+    duration_ms: 1000
+
+  - action: "click"
+    selector: "#btn-generate-hoplink"
+    duration_ms: 3500
+    callout: "Paso 5: ¡Hoplink encriptado listo para comisionar!"

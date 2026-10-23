@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClickBank Marketplace - Top Affiliate Offers</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --border: #1f2d4a;
+      --gold: #f59e0b;
+      --gold-hover: #d97706;
+      --emerald: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      background: rgba(19, 27, 46, 0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(8px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+    .brand span.badge-cb {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .balance-pill {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    main {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #131b2e 0%, #1e293b 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+    .filter-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      border: none;
+      padding: 0.85rem 1.6rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .product-card.highlight {
+      border-color: var(--gold);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.2);
+    }
+    .card-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+    .metrics-row {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0;
+      margin-bottom: 1.25rem;
+    }
+    .metric-item {
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .metric-value.green {
+      color: #34d399;
+    }
+    .btn-promote {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-promote:hover, .btn-promote.active {
+      background: var(--gold);
+      color: #0f172a;
+      border-color: var(--gold);
+    }
+    /* Hoplink Generator Modal */
+    .hoplink-box {
+      background: #0f172a;
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      display: none;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-muted);
+    }
+    .form-input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+    .result-box {
+      display: none;
+      margin-top: 1.25rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid #10b981;
+      padding: 1.25rem;
+      border-radius: 10px;
+    }
+    .result-url {
+      font-family: monospace;
+      font-size: 1rem;
+      color: #34d399;
+      font-weight: 700;
+      margin-top: 0.4rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="badge-cb">CB</span>
+      <span>ClickBank Marketplace Pro</span>
+    </div>
+    <div class="balance-pill">
+      <span>💰</span>
+      <span>COMISIONES ESTE MES: $4,850.00 USD</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Top Ofertas de Alta Conversión</h1>
+        <p>Encuentra productos validados con más del 70% de comisión recurrente.</p>
+      </div>
+      <button class="filter-btn" id="filter-high-gravity">
+        <span>🔥</span>
+        <span>Filtrar por Mayor Gravedad (Top Ventas)</span>
+      </button>
+    </div>
+
+    <div class="products-grid">
+      <!-- Producto 1 -->
+      <div class="product-card highlight" id="product-card-ai">
+        <div>
+          <span class="card-tag">⭐ N°1 EN TENDENCIA</span>
+          <h2 class="card-title">AI Video Creator Automator</h2>
+          <p class="card-desc">Software SaaS que genera videos virales con IA en segundos. Excelente retención y upsells.</p>
+        </div>
+        <div>
+          <div class="metrics-row">
+            <div class="metric-item">
+              <div class="metric-label">Comisión Media</div>
+              <div class="metric-value green">$142.50</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">Gravedad</div>
+              <div class="metric-value">348.6</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">% Comisión</div>
+              <div class="metric-value green">75%</div>
+            </div>
+          </div>
+          <button class="btn-promote" id="btn-promote-ai">
+            <span>🚀</span>
+            <span>Promocionar Este Producto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Producto 2 -->
+      <div class="product-card">
+        <div>
+          <span class="card-tag">BIENESTAR Y SALUD</span>
+          <h2 class="card-title">Keto Smart Metabolism Blueprint</h2>
+          <p class="card-desc">Guía interactiva y suplementos nutricionales con suscripción mensual de afiliados.</p>
+        </div>
+        <div>
+          <div class="metrics-row">
+            <div class="metric-item">
+              <div class="metric-label">Comisión Media</div>
+              <div class="metric-value green">$89.00</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">Gravedad</div>
+              <div class="metric-value">215.4</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">% Comisión</div>
+              <div class="metric-value green">70%</div>
+            </div>
+          </div>
+          <button class="btn-promote">
+            <span>🚀</span>
+            <span>Promocionar Este Producto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Producto 3 -->
+      <div class="product-card">
+        <div>
+          <span class="card-tag">NEGOCIOS DIGITALES</span>
+          <h2 class="card-title">NoCode SaaS Accelerator</h2>
+          <p class="card-desc">Curso premium y plantillas de Bubble y Make para emprendedores digitales.</p>
+        </div>
+        <div>
+          <div class="metrics-row">
+            <div class="metric-item">
+              <div class="metric-label">Comisión Media</div>
+              <div class="metric-value green">$210.00</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">Gravedad</div>
+              <div class="metric-value">180.2</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-label">% Comisión</div>
+              <div class="metric-value green">65%</div>
+            </div>
+          </div>
+          <button class="btn-promote">
+            <span>🚀</span>
+            <span>Promocionar Este Producto</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hoplink Modal / Builder -->
+    <div class="hoplink-box" id="hoplink-box">
+      <h2 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: #f59e0b;">⚡ Generador Instantáneo de Hoplink (ClickBank)</h2>
+      <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem;">Crea tu enlace encriptado trackeado para recibir tus comisiones directamente.</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="affiliate_nickname">Nombre de Usuario de Afiliado (Nickname):</label>
+          <input type="text" id="affiliate_nickname" name="affiliate_nickname" class="form-input" placeholder="ej: shameless_pro" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tracking_id">Tracking ID (Opcional):</label>
+          <input type="text" id="tracking_id" name="tracking_id" class="form-input" value="youtube_saas" />
+        </div>
+      </div>
+
+      <button class="filter-btn" id="btn-generate-hoplink" style="width: 100%; justify-content: center;">
+        <span>🔗</span>
+        <span>Crear Hoplink Encriptado y Activar Campaña</span>
+      </button>
+
+      <div class="result-box" id="result-box">
+        <div style="font-weight: 700; color: #34d399; font-size: 0.95rem;">✅ ¡Hoplink Oficial Generado con Éxito!</div>
+        <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.2rem;">Cada venta generada a través de este enlace te pagará <strong>$142.50 USD (75% comisión)</strong>:</div>
+        <div class="result-url" id="result-url">https://shameless_pro.aivideo.hop.clickbank.net/?tid=youtube_saas</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const filterBtn = document.getElementById('filter-high-gravity');
+    const promoteAiBtn = document.getElementById('btn-promote-ai');
+    const hoplinkBox = document.getElementById('hoplink-box');
+    const generateBtn = document.getElementById('btn-generate-hoplink');
+    const nicknameInput = document.getElementById('affiliate_nickname');
+    const resultBox = document.getElementById('result-box');
+    const resultUrl = document.getElementById('result-url');
+
+    filterBtn.addEventListener('click', () => {
+      filterBtn.style.background = '#10b981';
+      filterBtn.innerText = '✓ Filtro Aplicado: Gravedad > 300';
+    });
+
+    promoteAiBtn.addEventListener('click', () => {
+      hoplinkBox.style.display = 'block';
+      hoplinkBox.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    generateBtn.addEventListener('click', () => {
+      const nick = nicknameInput.value || 'shameless_aff';
+      resultUrl.innerText = `https://${nick}.aivideo.hop.clickbank.net/?tid=youtube_saas`;
+      resultBox.style.display = 'block';
+      generateBtn.style.background = '#10b981';
+      generateBtn.innerText = '✅ ¡Campaña y Enlace Listos para Facturar!';
+    });
+  </script>
+</body>
+</html>

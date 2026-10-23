@@ -67,10 +67,11 @@ def main():
 
     try:
         if not target_url:
-            mock_dir = PROJECT_ROOT / "demo_assets" / "mock_saas"
+            mock_sub = workflow.get("mock_dir", "mock_saas")
+            mock_dir = PROJECT_ROOT / "demo_assets" / mock_sub
             server = MockSaaSServer(mock_dir)
             target_url = server.start()
-            print(f"  -> Servidor SaaS simulado activo en: {target_url}")
+            print(f"  -> Servidor SaaS simulado activo en: {target_url} (origen: {mock_sub})")
 
         raw_recording = record_workflow_sync(
             target_url=target_url,
@@ -85,8 +86,9 @@ def main():
         ffmpeg_bin = find_ffmpeg_binary()
         print(f"  -> Motor FFmpeg: {ffmpeg_bin}")
 
-        horiz_out = out_dir / "tutorial_16x9_youtube.mp4"
-        vert_out = out_dir / "tutorial_9x16_shorts.mp4"
+        slug = workflow.get("slug", Path(args.config).stem)
+        horiz_out = out_dir / f"{slug}_16x9_youtube.mp4"
+        vert_out = out_dir / f"{slug}_9x16_shorts.mp4"
 
         print("  - Renderizando version horizontal (16:9 1080p)...")
         compose_horizontal(raw_recording, audio_path, horiz_out, ffmpeg_bin=ffmpeg_bin)
