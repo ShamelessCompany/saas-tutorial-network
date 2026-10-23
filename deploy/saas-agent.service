@@ -1,0 +1,17 @@
+[Unit]
+Description=SaaS Tutorial Network - 24/7 Autonomous Publisher Agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/SaaSTutorialNetwork
+ExecStart=/root/SaaSTutorialNetwork/.venv/bin/python src/agent_worker.py --interval 8.0
+Restart=always
+RestartSec=30
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=append:/var/log/saas_agent.log
+StandardError=append:/var/log/saas_agent_error.log
+
+[Install]
+WantedBy=multi-user.target

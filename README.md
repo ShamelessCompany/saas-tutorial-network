@@ -210,6 +210,58 @@ Para ejecutar este generador de forma desatendida y programada en un Droplet de 
 
 ---
 
+## 🤖 Agente Autónomo 24/7 y Subida a Canales de YouTube
+
+El proyecto incluye el motor `src/agent_worker.py` y el módulo de subida directa a YouTube Data API v3 (`src/youtube_uploader.py`) diseñado para operar en un VPS sin intervención humana:
+
+### 1. Configuración de Credenciales de YouTube
+1. En [Google Cloud Console](https://console.cloud.google.com/), crea un proyecto y activa la **YouTube Data API v3**.
+2. Ve a **Pantalla de consentimiento de OAuth** -> Configúrala como Externa y agrega tu email.
+3. En **Credenciales**, crea un ID de cliente OAuth 2.0 (Aplicación de escritorio) y descarga el archivo JSON.
+4. Guárdalo en la carpeta `credentials/client_secret.json`.
+5. Ejecuta una vez de forma interactiva para generar el token de refresco permanente:
+   ```bash
+   python -c "from src.youtube_uploader import get_authenticated_service; get_authenticated_service()"
+   ```
+   Esto creará `credentials/token.json`, el cual se renueva de forma automática 24/7 en el VPS sin pedir login de nuevo.
+
+### 2. Ejecución del Agente en Segundo Plano
+- **Modo prueba / simulado (Dry Run):**
+  ```bash
+  python src/agent_worker.py --once --dry-run
+  ```
+- **Modo continuo 24/7 (ej: cada 8 horas = 3 tandas al día):**
+  ```bash
+  python src/agent_worker.py --interval 8.0
+  ```
+
+### 3. Despliegue como Servicio Systemd en DigitalOcean / Ubuntu VPS
+Para que el agente se ejecute permanentemente 24/7 y reinicie automáticamente ante reinicios o caídas:
+
+1. **Instalar dependencias del sistema en el Droplet:**
+   ```bash
+   sudo apt update && sudo apt install -y python3-pip python3-venv ffmpeg xvfb
+   ```
+2. **Copiar el servicio:**
+   ```bash
+   sudo cp deploy/saas-agent.service /etc/systemd/system/saas-agent.service
+   sudo systemctl daemon-reload
+   sudo systemctl enable saas-agent
+   sudo systemctl start saas-agent
+   ```
+3. **Monitorear el estado y los logs en vivo:**
+   ```bash
+   sudo systemctl status saas-agent
+   journalctl -u saas-agent -f
+   ```
+
+### 4. Gestión de Cuota de YouTube Data API
+- Google otorga una cuota gratuita estándar de **10,000 unidades por día**.
+- Cada subida de video consume **1,600 unidades**.
+- Con el intervalo predeterminado de 8 horas (1 video horizontal + 1 Short = 2 videos por tanda = ~6 videos al día), la cuota se aprovecha al máximo sin superar el límite diario.
+
+---
+
 ## 👥 Coordinación del Equipo (6 Personas)
 
 - **Curaduría & Afiliados (2 Personas):** Identificar SaaS con comisiones recurrentes (20-40%) y diseñar los casos de uso "Solución en 2 clics".

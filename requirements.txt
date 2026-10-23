@@ -2,3 +2,6 @@ playwright>=1.40.0
 pyyaml>=6.0.1
 edge-tts>=6.1.10
 imageio-ffmpeg>=0.5.1
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1

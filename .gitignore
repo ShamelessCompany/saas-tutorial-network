@@ -15,11 +15,20 @@ output/
 temp/
 recordings/
 
+# Runtime agent logs and state
+agent.log
+*.log
+history.json
+
+# Secrets & Credentials (NEVER COMMIT)
+credentials/
+*.json.secret
+.env
+
 # Playwright cache & logs
 test-results/
 playwright-report/
 .playwright/
-*.log
 
 # IDE & OS
 .vscode/
