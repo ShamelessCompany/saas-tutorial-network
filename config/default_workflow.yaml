@@ -1,0 +1,56 @@
+title: "Automatización de Leads y CRM en 2 Clics con IA"
+saas_name: "NexusFlow AI"
+version: "1.0.0"
+
+affiliate:
+  code: "TUTORIAL30"
+  discount: "30% OFF"
+  link: "https://ejemplo-saas.com/ref/shameless"
+  banner_text: "🎁 30% DTO con código TUTORIAL30 • Link en descripción"
+
+narration:
+  enabled: true
+  voice: "es-ES-AlvaroNeural" # or es-MX-JorgeNeural / es-ES-ElviraNeural
+  script_parts:
+    hook: "¿Sigues copiando y pegando datos de tus clientes manualmente?"
+    problem: "Eso consume horas valiosas y provoca errores humanos costosos."
+    solution: "Hoy te muestro cómo automatizar todo en dos simples clics con inteligencia artificial."
+    cta: "Tienes el enlace oficial y el cupón con 30% de descuento en la descripción."
+
+viewport:
+  width: 1920
+  height: 1080
+
+steps:
+  - action: "wait"
+    duration_ms: 1500
+    callout: "Paso 1: Abrir panel de control"
+
+  - action: "hover"
+    selector: "#btn-create-automation"
+    duration_ms: 1200
+
+  - action: "click"
+    selector: "#btn-create-automation"
+    duration_ms: 1500
+    callout: "Paso 2: Abrir constructor inteligente"
+
+  - action: "click"
+    selector: "input[name='prompt_input']"
+    duration_ms: 500
+
+  - action: "type"
+    selector: "input[name='prompt_input']"
+    text: "Sincronizar leads de Stripe con Notion y enviar alerta inmediata"
+    delay_ms: 60
+    duration_ms: 1200
+    callout: "Paso 3: Prompt en lenguaje natural"
+
+  - action: "hover"
+    selector: "#btn-generate-flow"
+    duration_ms: 1000
+
+  - action: "click"
+    selector: "#btn-generate-flow"
+    duration_ms: 3500
+    callout: "Paso 4: ¡Flujo en vivo en 2 clics!"

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Output videos and temporary render assets
+output/
+*.webm
+*.mp4
+*.wav
+*.mp3
+temp/
+recordings/
+
+# Playwright cache & logs
+test-results/
+playwright-report/
+.playwright/
+*.log
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

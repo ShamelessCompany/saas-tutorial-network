@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusFlow AI - Enterprise Automation Suite</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #111827;
+      --border: #1f2937;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #10b981;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.025em;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: white;
+      font-size: 1rem;
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    main {
+      flex: 1;
+      padding: 2.5rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(180deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.6) 100%);
+      border: 1px solid var(--border);
+      padding: 1.75rem 2rem;
+      border-radius: 16px;
+    }
+    .hero-text h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+    .hero-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .metric-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .metric-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .metric-trend {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+    .builder-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .form-input {
+      width: 100%;
+      background: #0b0f19;
+      border: 1px solid #374151;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .flow-preview {
+      margin-top: 1.5rem;
+      background: #070a12;
+      border: 1px dashed #374151;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: none;
+    }
+    .nodes-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+    .flow-node {
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .flow-node.active {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+    .flow-arrow {
+      color: #6b7280;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .success-alert {
+      display: none;
+      margin-top: 1.5rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #34d399;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    /* Dynamic cursor visual helper inside web page */
+    #custom-pointer {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      background: rgba(239, 68, 68, 0.85);
+      border: 2px solid white;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s ease, width 0.1s ease, height 0.1s ease;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+      display: none;
+    }
+    #custom-pointer.clicking {
+      transform: translate(-50%, -50%) scale(1.6);
+      background: rgba(245, 158, 11, 0.95);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 1);
+    }
+  </style>
+</head>
+<body>
+  <div id="custom-pointer"></div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <span>NexusFlow AI</span>
+    </div>
+    <div class="badge-status">
+      <div class="pulse-dot"></div>
+      <span>MOTOR EN VIVO ACTIVO</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h1>Automatizaciones de Flujo de Trabajo</h1>
+        <p>Crea integraciones inteligentes entre tu CRM, Base de Datos y Mensajería con IA.</p>
+      </div>
+      <button class="btn-primary" id="btn-create-automation">
+        <span>⚡</span>
+        <span>Crear Nueva Automatización</span>
+      </button>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Tareas Automatizadas</div>
+        <div class="metric-val">142,850</div>
+        <div class="metric-trend">+28% este mes</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Tiempo Ahorrado</div>
+        <div class="metric-val">340 hrs</div>
+        <div class="metric-trend">+14 hrs esta semana</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Tasa de Entrega</div>
+        <div class="metric-val">99.94%</div>
+        <div class="metric-trend">Excelente</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Retorno de Inversión (ROI)</div>
+        <div class="metric-val">4.8x</div>
+        <div class="metric-trend">Nivel Enterprise</div>
+      </div>
+    </div>
+
+    <div class="builder-section" id="builder-box">
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Construir Flujo con Inteligencia Artificial</h2>
+      <div class="form-group">
+        <label class="form-label" for="prompt_input">Objetivo de la Automatización:</label>
+        <input 
+          type="text" 
+          id="prompt_input" 
+          name="prompt_input" 
+          class="form-input" 
+          placeholder="Escribe lo que quieres automatizar (ej: Notificar a Slack y registrar en Notion cuando entre un cliente)..."
+        />
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button class="btn-primary" id="btn-generate-flow" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <span>🚀</span>
+          <span>Desplegar en 2 Clics</span>
+        </button>
+        <span id="generating-spinner" style="display: none; color: #a5b4fc; font-size: 0.9rem;">
+          ⚙️ Analizando lógica de conexión...
+        </span>
+      </div>
+
+      <div class="flow-preview" id="flow-preview">
+        <div style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 0.5rem; font-weight: 600;">CANVAS GENERADO:</div>
+        <div class="nodes-container">
+          <div class="flow-node active">
+            <span>📡</span> Webhook Disparador
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node active">
+            <span>🧠</span> Filtro de Calificación IA
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-node active">
+            <span>📊</span> Notion DB + Alerta Telegram
+          </div>
+        </div>
+      </div>
+
+      <div class="success-alert" id="success-alert">
+        <span style="font-size: 1.25rem;">✅</span>
+        <div>
+          <strong>¡Automatización desplegada con éxito!</strong>
+          <div style="font-size: 0.85rem; opacity: 0.9;">El flujo está escuchando eventos y operando en segundo plano.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const btnCreate = document.getElementById('btn-create-automation');
+    const builderBox = document.getElementById('builder-box');
+    const btnGenerate = document.getElementById('btn-generate-flow');
+    const promptInput = document.getElementById('prompt_input');
+    const spinner = document.getElementById('generating-spinner');
+    const flowPreview = document.getElementById('flow-preview');
+    const successAlert = document.getElementById('success-alert');
+
+    // Visual pointer support for video automation
+    const pointer = document.getElementById('custom-pointer');
+    document.addEventListener('mousemove', (e) => {
+      pointer.style.display = 'block';
+      pointer.style.left = e.clientX + 'px';
+      pointer.style.top = e.clientY + 'px';
+    });
+    document.addEventListener('mousedown', () => {
+      pointer.classList.add('clicking');
+    });
+    document.addEventListener('mouseup', () => {
+      pointer.classList.remove('clicking');
+    });
+
+    btnCreate.addEventListener('click', () => {
+      builderBox.style.display = 'block';
+      builderBox.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    btnGenerate.addEventListener('click', () => {
+      spinner.style.display = 'inline-block';
+      btnGenerate.disabled = true;
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        flowPreview.style.display = 'block';
+        setTimeout(() => {
+          successAlert.style.display = 'flex';
+          btnGenerate.disabled = false;
+        }, 800);
+      }, 1200);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+playwright>=1.40.0
+pyyaml>=6.0.1
+edge-tts>=6.1.10
+imageio-ffmpeg>=0.5.1
