@@ -28,18 +28,17 @@ INJECTED_OVERLAY_SCRIPT = """
   cursor.style.position = 'fixed';
   cursor.style.top = '0';
   cursor.style.left = '0';
-  cursor.style.width = '28px';
-  cursor.style.height = '28px';
+  cursor.style.width = '24px';
+  cursor.style.height = '24px';
   cursor.style.pointerEvents = 'none';
   cursor.style.zIndex = '2147483647';
-  cursor.style.transform = 'translate(250px, 250px)';
-  cursor.style.transition = 'transform 0.04s cubic-bezier(0.25, 1, 0.5, 1)';
+  cursor.style.transform = 'translate3d(250px, 250px, 0)';
   cursor.style.willChange = 'transform';
   cursor.innerHTML = `
-    <svg width="26" height="26" viewBox="0 0 24 24" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));">
-      <path d="M4 2L18 11.5L11.5 13.5L8 21.5L4 2Z" fill="#0f172a" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <svg id="cursor-svg" width="24" height="24" viewBox="0 0 24 24" style="transform-origin: 0 0; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));">
+      <path d="M3 2L18 12L11 14L8 21L3 2Z" fill="#111827" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
     </svg>
-    <div id="cursor-ripple" style="position: absolute; top: 0; left: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(59, 130, 246, 0.4); border: 2px solid #3b82f6; transform: translate(-50%, -50%) scale(0); pointer-events: none; opacity: 0;"></div>
+    <div id="cursor-ripple" style="position: absolute; top: 0; left: 0; width: 30px; height: 30px; border-radius: 50%; background: rgba(99, 102, 241, 0.45); border: 2px solid #818cf8; transform: translate(-50%, -50%) scale(0); pointer-events: none; opacity: 0;"></div>
   `;
 
   // Step callout card (top-right)
@@ -84,21 +83,26 @@ INJECTED_OVERLAY_SCRIPT = """
   document.body.appendChild(overlay);
 
   window.__moveCursor = (x, y) => {
-    cursor.style.transform = `translate(${x}px, ${y}px)`;
+    cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   };
 
+  const cursorSvg = document.getElementById('cursor-svg');
   window.__clickCursor = (x, y) => {
     if (x !== undefined && y !== undefined) {
-      cursor.style.transform = `translate(${x}px, ${y}px)`;
+      cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
+    if (cursorSvg) {
+      cursorSvg.style.transform = 'scale(0.88)';
+      setTimeout(() => { cursorSvg.style.transform = 'scale(1)'; }, 140);
     }
     const ripple = document.getElementById('cursor-ripple');
     if (ripple) {
       ripple.style.transition = 'none';
-      ripple.style.transform = 'translate(-50%, -50%) scale(0.2)';
-      ripple.style.opacity = '1';
+      ripple.style.transform = 'translate(-50%, -50%) scale(0.3)';
+      ripple.style.opacity = '0.9';
       setTimeout(() => {
-        ripple.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
-        ripple.style.transform = 'translate(-50%, -50%) scale(2.2)';
+        ripple.style.transition = 'transform 0.45s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.45s ease-out';
+        ripple.style.transform = 'translate(-50%, -50%) scale(2.6)';
         ripple.style.opacity = '0';
       }, 20);
     }
@@ -135,48 +139,76 @@ async def human_mouse_move(
     page,
     start: Tuple[float, float],
     end: Tuple[float, float],
-    steps: int = 20
+    gravity: float = 9.0,
+    wind: float = 3.0,
+    max_step: float = 24.0,
+    target_area: float = 12.0
 ) -> Tuple[float, float]:
-    """Simulates realistic human mouse movement with Bezier curvature and variable acceleration."""
-    x0, y0 = start
-    x2, y2 = end
-    dist = math.hypot(x2 - x0, y2 - y0)
-    if dist < 4:
-        await page.mouse.move(x2, y2)
+    """
+    Biological human mouse dynamics using the WindMouse physics engine.
+    Simulates physical hand mass, momentum, neuromuscular wandering noise (wind),
+    gravitational target pull, and natural micro-corrections near elements.
+    """
+    x0, y0 = float(start[0]), float(start[1])
+    dest_x, dest_y = float(end[0]), float(end[1])
+    dist = math.hypot(dest_x - x0, dest_y - y0)
+
+    if dist < 3.0:
+        await page.mouse.move(dest_x, dest_y)
         try:
-            await page.evaluate(f"window.__moveCursor({x2}, {y2})")
+            await page.evaluate(f"window.__moveCursor({dest_x}, {dest_y})")
         except Exception:
             pass
-        return end
+        return dest_x, dest_y
 
-    # Random arc curvature
-    mid_x = (x0 + x2) / 2
-    mid_y = (y0 + y2) / 2
-    normal_x = -(y2 - y0) / dist
-    normal_y = (x2 - x0) / dist
-    arc = (random.random() - 0.5) * min(120.0, dist * 0.35)
-    x1 = mid_x + normal_x * arc
-    y1 = mid_y + normal_y * arc
+    current_x, current_y = x0, y0
+    v_x, v_y = 0.0, 0.0
+    w_x, w_y = 0.0, 0.0
 
-    # Smoothstep interpolation
-    for i in range(1, steps + 1):
-        t = i / steps
-        ease = t * t * (3 - 2 * t)
-        bx = (1 - ease)**2 * x0 + 2 * (1 - ease) * ease * x1 + ease**2 * x2
-        by = (1 - ease)**2 * y0 + 2 * (1 - ease) * ease * y1 + ease**2 * y2
-        await page.mouse.move(bx, by)
+    # Dynamic speed scaling: faster on long distances, gentle on short distances
+    current_max_step = min(max_step, max(7.0, dist / 12.0))
+
+    while True:
+        d = math.hypot(dest_x - current_x, dest_y - current_y)
+        if d <= 3.5:
+            break
+
+        if d > target_area:
+            w_x = w_x / math.sqrt(5) + (random.random() * (wind * 2 + 1) - wind) / math.sqrt(3)
+            w_y = w_y / math.sqrt(5) + (random.random() * (wind * 2 + 1) - wind) / math.sqrt(3)
+        else:
+            w_x /= math.sqrt(5)
+            w_y /= math.sqrt(5)
+            current_max_step = max(3.5, current_max_step * 0.72)
+
+        v_x += w_x + gravity * (dest_x - current_x) / d
+        v_y += w_y + gravity * (dest_y - current_y) / d
+
+        v_mag = math.hypot(v_x, v_y)
+        if v_mag > current_max_step:
+            rand_dist = current_max_step / 2.0 + random.random() * current_max_step / 2.0
+            v_x = (v_x / v_mag) * rand_dist
+            v_y = (v_y / v_mag) * rand_dist
+
+        current_x += v_x
+        current_y += v_y
+
+        await page.mouse.move(current_x, current_y)
         try:
-            await page.evaluate(f"window.__moveCursor({bx}, {by})")
+            await page.evaluate(f"window.__moveCursor({current_x}, {current_y})")
         except Exception:
             pass
-        await page.wait_for_timeout(random.randint(12, 22))
+        await asyncio.sleep(random.uniform(0.007, 0.015))
 
-    await page.mouse.move(x2, y2)
+    # Final settle onto destination with micro-correction
+    await page.mouse.move(dest_x, dest_y)
     try:
-        await page.evaluate(f"window.__moveCursor({x2}, {y2})")
+        await page.evaluate(f"window.__moveCursor({dest_x}, {dest_y})")
     except Exception:
         pass
-    return end
+    # Organic hand pause
+    await asyncio.sleep(random.uniform(0.04, 0.08))
+    return dest_x, dest_y
 
 async def _execute_action(
     page,
@@ -205,8 +237,9 @@ async def _execute_action(
             await loc.scroll_into_view_if_needed(timeout=2500)
             box = await loc.bounding_box()
             if box:
-                target_x = box["x"] + box["width"] * 0.5 + random.uniform(-4, 4)
-                target_y = box["y"] + box["height"] * 0.5 + random.uniform(-3, 3)
+                # Organic target landing point (natural human variance)
+                target_x = box["x"] + box["width"] * random.uniform(0.35, 0.65)
+                target_y = box["y"] + box["height"] * random.uniform(0.40, 0.60)
                 cursor_state[0], cursor_state[1] = await human_mouse_move(
                     page, (cursor_state[0], cursor_state[1]), (target_x, target_y)
                 )
@@ -220,12 +253,13 @@ async def _execute_action(
             await loc.scroll_into_view_if_needed(timeout=2500)
             box = await loc.bounding_box()
             if box:
-                target_x = box["x"] + box["width"] * 0.5 + random.uniform(-4, 4)
-                target_y = box["y"] + box["height"] * 0.5 + random.uniform(-3, 3)
+                target_x = box["x"] + box["width"] * random.uniform(0.35, 0.65)
+                target_y = box["y"] + box["height"] * random.uniform(0.40, 0.60)
                 cursor_state[0], cursor_state[1] = await human_mouse_move(
                     page, (cursor_state[0], cursor_state[1]), (target_x, target_y)
                 )
-            await page.wait_for_timeout(random.randint(80, 160))
+            # Natural human reaction hesitation before press
+            await asyncio.sleep(random.uniform(0.12, 0.22))
             try:
                 await page.evaluate(f"window.__clickCursor({cursor_state[0]}, {cursor_state[1]})")
             except Exception:
@@ -245,26 +279,37 @@ async def _execute_action(
             await loc.scroll_into_view_if_needed(timeout=2500)
             box = await loc.bounding_box()
             if box:
-                target_x = box["x"] + box["width"] * 0.5
+                target_x = box["x"] + box["width"] * random.uniform(0.25, 0.45)
                 target_y = box["y"] + box["height"] * 0.5
                 cursor_state[0], cursor_state[1] = await human_mouse_move(
                     page, (cursor_state[0], cursor_state[1]), (target_x, target_y)
                 )
             await loc.click(timeout=3000)
             text = step.get("text", "")
-            delay = step.get("delay_ms", 55)
-            await loc.type(text, delay=delay)
+            # Variable human keystroke typing cadence
+            for ch in text:
+                await page.keyboard.type(ch)
+                await asyncio.sleep(random.uniform(0.04, 0.09))
         except Exception:
             pass
         await page.wait_for_timeout(duration)
 
     elif action == "scroll":
         delta_y = step.get("delta_y", 600)
-        steps_count = 15
-        step_delta = delta_y / steps_count
-        for _ in range(steps_count):
-            await page.mouse.wheel(0, step_delta)
-            await page.wait_for_timeout(35)
+        # Position mouse in reading column with natural drifting
+        reading_x = max(200.0, min(1400.0, cursor_state[0] + random.uniform(-40, 40)))
+        reading_y = max(250.0, min(650.0, cursor_state[1] + random.uniform(-25, 25)))
+        cursor_state[0], cursor_state[1] = await human_mouse_move(
+            page, (cursor_state[0], cursor_state[1]), (reading_x, reading_y)
+        )
+
+        # Inertial smooth cosine-decay wheel scroll
+        steps_count = 20
+        for i in range(1, steps_count + 1):
+            portion = math.sin((i / steps_count) * math.pi)
+            chunk = (delta_y / steps_count) * portion * 1.57
+            await page.mouse.wheel(0, chunk)
+            await asyncio.sleep(random.uniform(0.02, 0.038))
         await page.wait_for_timeout(duration)
 
     elif action == "navigate" and step.get("url"):
@@ -272,6 +317,15 @@ async def _execute_action(
         await page.wait_for_timeout(duration)
 
     elif action == "wait":
+        # Subtle idle breath / micro drift while waiting so cursor doesn't look dead
+        if random.random() > 0.4:
+            drift_x = cursor_state[0] + random.uniform(-3, 3)
+            drift_y = cursor_state[1] + random.uniform(-3, 3)
+            await page.mouse.move(drift_x, drift_y)
+            try:
+                await page.evaluate(f"window.__moveCursor({drift_x}, {drift_y})")
+            except Exception:
+                pass
         await page.wait_for_timeout(duration)
 
     # Re-inject overlay in case page DOM changed
