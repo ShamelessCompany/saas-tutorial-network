@@ -27,12 +27,15 @@ def generate_auto_steps(url: str, custom_title: str | None = None):
     title = custom_title or f"Explorando {domain}"
 
     steps = [
-        {"action": "wait", "duration_ms": 1800, "callout": f"Paso 1: Ingreso a {domain}"},
+        {"action": "wait", "duration_ms": 1600, "callout": f"Paso 1: Ingreso a {domain}"},
+        {"action": "diagonal_sweep", "duration_ms": 1100},
         {"action": "hover", "selector": "h1, header, .hero", "duration_ms": 1200},
         {"action": "scroll", "delta_y": 600, "duration_ms": 2200, "callout": "Paso 2: Explorando contenido y características"},
-        {"action": "hover", "selector": "button, a[role='button'], a.btn, a", "duration_ms": 1500},
+        {"action": "diagonal_sweep", "duration_ms": 1000},
+        {"action": "hover", "selector": "button, a[role='button'], a.btn, a", "duration_ms": 1400},
         {"action": "scroll", "delta_y": 700, "duration_ms": 2200, "callout": "Paso 3: Verificando requisitos y beneficios"},
-        {"action": "hover", "selector": "button:has-text('Join'), button:has-text('Empezar'), button:has-text('Sign'), a:has-text('Join'), button", "duration_ms": 1800},
+        {"action": "diagonal_sweep", "duration_ms": 1100},
+        {"action": "hover", "selector": "button:has-text('Join'), button:has-text('Empezar'), button:has-text('Sign'), a:has-text('Join'), button", "duration_ms": 1600},
         {"action": "click", "selector": "button:has-text('Join'), button:has-text('Empezar'), a:has-text('Join'), button, a", "duration_ms": 2500, "callout": "Paso 4: ¡Acceso directo y activación!"},
         {"action": "wait", "duration_ms": 2500, "callout": "¡Enlace oficial y detalles en la descripción!"}
     ]

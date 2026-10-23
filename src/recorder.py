@@ -135,24 +135,19 @@ INJECTED_OVERLAY_SCRIPT = """
 })();
 """
 
-async def human_mouse_move(
+async def _wind_mouse_segment(
     page,
     start: Tuple[float, float],
-    end: Tuple[float, float],
+    dest: Tuple[float, float],
     gravity: float = 9.0,
     wind: float = 3.0,
     max_step: float = 24.0,
     target_area: float = 12.0
 ) -> Tuple[float, float]:
-    """
-    Biological human mouse dynamics using the WindMouse physics engine.
-    Simulates physical hand mass, momentum, neuromuscular wandering noise (wind),
-    gravitational target pull, and natural micro-corrections near elements.
-    """
+    """Single physical leg of mouse movement."""
     x0, y0 = float(start[0]), float(start[1])
-    dest_x, dest_y = float(end[0]), float(end[1])
+    dest_x, dest_y = float(dest[0]), float(dest[1])
     dist = math.hypot(dest_x - x0, dest_y - y0)
-
     if dist < 3.0:
         await page.mouse.move(dest_x, dest_y)
         try:
@@ -164,8 +159,6 @@ async def human_mouse_move(
     current_x, current_y = x0, y0
     v_x, v_y = 0.0, 0.0
     w_x, w_y = 0.0, 0.0
-
-    # Dynamic speed scaling: faster on long distances, gentle on short distances
     current_max_step = min(max_step, max(7.0, dist / 12.0))
 
     while True:
@@ -200,15 +193,61 @@ async def human_mouse_move(
             pass
         await asyncio.sleep(random.uniform(0.007, 0.015))
 
-    # Final settle onto destination with micro-correction
     await page.mouse.move(dest_x, dest_y)
     try:
         await page.evaluate(f"window.__moveCursor({dest_x}, {dest_y})")
     except Exception:
         pass
-    # Organic hand pause
-    await asyncio.sleep(random.uniform(0.04, 0.08))
     return dest_x, dest_y
+
+async def human_mouse_move(
+    page,
+    start: Tuple[float, float],
+    end: Tuple[float, float],
+    gravity: float = 8.5,
+    wind: float = 3.2,
+    max_step: float = 24.0,
+    target_area: float = 12.0
+) -> Tuple[float, float]:
+    """
+    Biological human mouse dynamics using WindMouse with ergonomic diagonal sweep bias.
+    Simulates forearm pivot on desk causing natural diagonal arcs across the viewport.
+    """
+    x0, y0 = float(start[0]), float(start[1])
+    dest_x, dest_y = float(end[0]), float(end[1])
+    dist = math.hypot(dest_x - x0, dest_y - y0)
+
+    # For movements with enough distance, inject an anatomical diagonal sweeping waypoint
+    if dist > 85.0:
+        base_angle = math.atan2(dest_y - y0, dest_x - x0)
+        # Pronounced diagonal deflection (±35 to ±55 degrees)
+        diag_sign = random.choice([-1.0, 1.0])
+        deflection_angle = base_angle + diag_sign * random.uniform(0.60, 0.95)
+
+        # Proportional diagonal sweep amplitude
+        sweep_radius = min(280.0, max(60.0, dist * random.uniform(0.35, 0.55)))
+        mid_x = (x0 + dest_x) * 0.5 + math.cos(deflection_angle) * sweep_radius
+        mid_y = (y0 + dest_y) * 0.5 + math.sin(deflection_angle) * sweep_radius
+
+        mid_x = max(60.0, min(1860.0, mid_x))
+        mid_y = max(60.0, min(1020.0, mid_y))
+
+        # First leg: sweep outward diagonally across the screen
+        await _wind_mouse_segment(
+            page, (x0, y0), (mid_x, mid_y),
+            gravity=gravity * 0.9, wind=wind * 1.2, max_step=max_step, target_area=24.0
+        )
+        intermediate_start = (mid_x, mid_y)
+    else:
+        intermediate_start = (x0, y0)
+
+    # Second leg: curve smoothly into target
+    res = await _wind_mouse_segment(
+        page, intermediate_start, (dest_x, dest_y),
+        gravity=gravity, wind=wind, max_step=max_step, target_area=target_area
+    )
+    await asyncio.sleep(random.uniform(0.04, 0.09))
+    return res
 
 async def _execute_action(
     page,
@@ -294,11 +333,24 @@ async def _execute_action(
             pass
         await page.wait_for_timeout(duration)
 
+    elif action == "diagonal_sweep":
+        cur_x, cur_y = cursor_state[0], cursor_state[1]
+        target_x = 1200.0 if cur_x < 700 else 300.0
+        target_y = 650.0 if cur_y < 450 else 220.0
+        target_x += random.uniform(-80, 80)
+        target_y += random.uniform(-50, 50)
+        cursor_state[0], cursor_state[1] = await human_mouse_move(
+            page, (cur_x, cur_y), (target_x, target_y)
+        )
+        await page.wait_for_timeout(duration)
+
     elif action == "scroll":
         delta_y = step.get("delta_y", 600)
-        # Position mouse in reading column with natural drifting
-        reading_x = max(200.0, min(1400.0, cursor_state[0] + random.uniform(-40, 40)))
-        reading_y = max(250.0, min(650.0, cursor_state[1] + random.uniform(-25, 25)))
+        # Pronounced diagonal reading sweep across the content area
+        diag_dx = random.choice([-1.0, 1.0]) * random.uniform(180.0, 360.0)
+        diag_dy = random.uniform(100.0, 220.0)
+        reading_x = max(180.0, min(1480.0, cursor_state[0] + diag_dx))
+        reading_y = max(240.0, min(720.0, cursor_state[1] + diag_dy))
         cursor_state[0], cursor_state[1] = await human_mouse_move(
             page, (cursor_state[0], cursor_state[1]), (reading_x, reading_y)
         )
