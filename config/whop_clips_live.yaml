@@ -1,0 +1,56 @@
+title: "Cómo Ganar Dinero con Whop Clips Recortando Videos Virales"
+slug: "whop_clips"
+target_url: "https://whop.com/blog/whop-clips/"
+version: "1.0.0"
+
+affiliate:
+  code: "WHOPCLIPS"
+  discount: "Acceso Gratuito"
+  link: "https://whop.com/whop-clips/"
+  banner_text: "🔥 Programa Oficial Whop Clips • Enlace de Acceso en Descripción"
+
+narration:
+  enabled: true
+  voice: "es-ES-AlvaroNeural"
+  script_parts:
+    hook: "¿Sabías que puedes ganar miles de dólares al mes recortando videos virales sin mostrar tu cara?"
+    problem: "La mayoría de personas pierden tiempo creando contenido desde cero sin saber cómo monetizarlo."
+    solution: "Con Whop Clips te pagan directamente por visualizaciones creando y republicando contenido de sus creadores top."
+    cta: "Tienes el enlace oficial y los pasos para registrarte gratis en la descripción y primer comentario."
+
+viewport:
+  width: 1920
+  height: 1080
+
+steps:
+  - action: "wait"
+    duration_ms: 2000
+    callout: "Paso 1: Plataforma Oficial de Whop Clips"
+
+  - action: "scroll"
+    delta_y: 650
+    duration_ms: 2500
+    callout: "Paso 2: ¿Cómo funciona? Pagos por visualizaciones"
+
+  - action: "scroll"
+    delta_y: 850
+    duration_ms: 2500
+    callout: "Paso 3: Reglas simples y aprobación para creadores"
+
+  - action: "scroll"
+    delta_y: 800
+    duration_ms: 2000
+    callout: "Paso 4: Pagos directos cada mes"
+
+  - action: "navigate"
+    url: "https://whop.com/whop-clips/"
+    duration_ms: 3000
+    callout: "Paso 5: Comunidad oficial en Whop"
+
+  - action: "hover"
+    selector: "button:has-text('Join')"
+    duration_ms: 1500
+
+  - action: "wait"
+    duration_ms: 3000
+    callout: "¡Enlace oficial y guía gratuita en la descripción!"

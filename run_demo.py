@@ -63,7 +63,7 @@ def main():
     # 3. Target Environment & Recording
     print("\n[3/5] Grabando sesion de navegador en 1080p con Playwright...")
     server = None
-    target_url = args.url
+    target_url = args.url or workflow.get("target_url")
 
     try:
         if not target_url:
@@ -72,14 +72,28 @@ def main():
             server = MockSaaSServer(mock_dir)
             target_url = server.start()
             print(f"  -> Servidor SaaS simulado activo en: {target_url} (origen: {mock_sub})")
+        else:
+            print(f"  -> Grabando URL real en vivo: {target_url}")
 
+        print("  - Grabando version horizontal (1920x1080)...")
         raw_recording = record_workflow_sync(
             target_url=target_url,
             workflow=workflow,
-            output_dir=temp_dir,
+            output_dir=temp_dir / "horiz",
             headless=not args.headed
         )
-        print(f"  -> Captura de pantalla completada: {raw_recording.name}")
+        print(f"  -> Captura horizontal completada: {raw_recording.name}")
+
+        print("  - Grabando version vertical nativa para Shorts (1080x1920)...")
+        workflow_vert = dict(workflow)
+        workflow_vert["viewport"] = {"width": 1080, "height": 1920}
+        raw_recording_vert = record_workflow_sync(
+            target_url=target_url,
+            workflow=workflow_vert,
+            output_dir=temp_dir / "vert",
+            headless=not args.headed
+        )
+        print(f"  -> Captura vertical completada: {raw_recording_vert.name}")
 
         # 4. Packaging
         print("\n[4/5] Ensamblando video multiformato con FFmpeg...")
@@ -94,8 +108,8 @@ def main():
         compose_horizontal(raw_recording, audio_path, horiz_out, ffmpeg_bin=ffmpeg_bin)
         print(f"    [OK] Listo: {horiz_out} ({horiz_out.stat().st_size / (1024*1024):.2f} MB)")
 
-        print("  - Renderizando version vertical (9:16 Shorts/TikTok)...")
-        compose_vertical_short(raw_recording, audio_path, vert_out, ffmpeg_bin=ffmpeg_bin)
+        print("  - Renderizando version vertical nativa (9:16 Shorts/TikTok)...")
+        compose_vertical_short(raw_recording_vert, audio_path, vert_out, ffmpeg_bin=ffmpeg_bin)
         print(f"    [OK] Listo: {vert_out} ({vert_out.stat().st_size / (1024*1024):.2f} MB)")
 
     finally:

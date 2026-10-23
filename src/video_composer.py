@@ -78,6 +78,23 @@ def compose_horizontal(
 
     return out
 
+def get_video_dimensions(video_path: Path | str, ffmpeg_bin: str) -> tuple[int, int]:
+    """Detect width and height of video file via FFmpeg stderr."""
+    try:
+        res = subprocess.run(
+            [ffmpeg_bin, "-i", str(video_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        import re
+        m = re.search(r",\s*(\d{3,4})x(\d{3,4})", res.stderr)
+        if m:
+            return int(m.group(1)), int(m.group(2))
+    except Exception:
+        pass
+    return 1920, 1080
+
 def compose_vertical_short(
     raw_video_path: Path | str,
     audio_path: Optional[Path | str],
@@ -88,22 +105,26 @@ def compose_vertical_short(
 ) -> Path:
     """
     Exports 1080x1920 9:16 Vertical Video for YouTube Shorts, Instagram Reels & TikTok.
-    Uses blurred background padding with sharp centered SaaS interaction.
+    If video is already vertical (e.g. 1080x1920), scales full-frame.
+    If video is horizontal, uses blurred background padding with enlarged centered UI.
     """
     raw_video = Path(raw_video_path).resolve()
     out = Path(output_path).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     bin_path = ffmpeg_bin or find_ffmpeg_binary()
 
-    # Filter complex:
-    # 1. Scale background to fill 1080x1920, blur it
-    # 2. Scale foreground to width 1080 (maintaining 16:9 aspect = 1080x608)
-    # 3. Overlay foreground at center (y = (1920-608)/2 = 656)
-    filter_graph = (
-        "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:5[bg];"
-        "[0:v]scale=1080:-1[fg];"
-        "[bg][fg]overlay=(W-w)/2:(H-h)/2[vcomposed]"
-    )
+    w, h = get_video_dimensions(raw_video, bin_path)
+
+    if h >= w:
+        # Native vertical recording: scale to full 1080x1920 without black bars
+        filter_graph = "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[vcomposed]"
+    else:
+        # Horizontal recording: blurred background with enlarged readable foreground
+        filter_graph = (
+            "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5[bg];"
+            "[0:v]scale=1280:-1[fg];"
+            "[bg][fg]overlay=(W-w)/2:(H-h)/2[vcomposed]"
+        )
 
     cmd = [
         bin_path, "-y",

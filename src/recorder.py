@@ -80,23 +80,30 @@ INJECTED_OVERLAY_SCRIPT = """
 })();
 """
 
-async def _execute_action(page, step: Dict[str, Any]):
+async def _execute_action(page, step: Dict[str, Any], affiliate_banner: str = ""):
     action = step.get("action", "wait")
     callout = step.get("callout")
-    if callout:
-        await page.evaluate(f"window.__showCallout({repr(callout)})")
+
+    try:
+        await page.evaluate(INJECTED_OVERLAY_SCRIPT)
+        if affiliate_banner:
+            await page.evaluate(f"window.__showAffiliate({repr(affiliate_banner)})")
+        if callout:
+            await page.evaluate(f"window.__showCallout({repr(callout)})")
+    except Exception:
+        pass
 
     selector = step.get("selector")
     duration = step.get("duration_ms", 1000)
 
     if action == "hover" and selector:
-        loc = page.locator(selector)
+        loc = page.locator(selector).first
         await loc.scroll_into_view_if_needed()
         await loc.hover()
         await page.wait_for_timeout(duration)
 
     elif action == "click" and selector:
-        loc = page.locator(selector)
+        loc = page.locator(selector).first
         await loc.scroll_into_view_if_needed()
         await loc.hover()
         await page.wait_for_timeout(300)
@@ -106,14 +113,37 @@ async def _execute_action(page, step: Dict[str, Any]):
     elif action == "type" and selector:
         text = step.get("text", "")
         delay = step.get("delay_ms", 50)
-        loc = page.locator(selector)
+        loc = page.locator(selector).first
         await loc.scroll_into_view_if_needed()
         await loc.click()
         await loc.type(text, delay=delay)
         await page.wait_for_timeout(duration)
 
+    elif action == "scroll":
+        delta_y = step.get("delta_y", 600)
+        steps_count = 15
+        step_delta = delta_y / steps_count
+        for _ in range(steps_count):
+            await page.mouse.wheel(0, step_delta)
+            await page.wait_for_timeout(35)
+        await page.wait_for_timeout(duration)
+
+    elif action == "navigate" and step.get("url"):
+        await page.goto(step["url"], wait_until="domcontentloaded")
+        await page.wait_for_timeout(duration)
+
     elif action == "wait":
         await page.wait_for_timeout(duration)
+
+    # Re-inject overlay in case page DOM changed or reloaded
+    try:
+        await page.evaluate(INJECTED_OVERLAY_SCRIPT)
+        if affiliate_banner:
+            await page.evaluate(f"window.__showAffiliate({repr(affiliate_banner)})")
+        if callout:
+            await page.evaluate(f"window.__showCallout({repr(callout)})")
+    except Exception:
+        pass
 
 async def record_workflow_video(
     target_url: str,
@@ -142,18 +172,21 @@ async def record_workflow_video(
 
         page = await context.new_page()
 
-        # Navigate
-        await page.goto(target_url, wait_until="networkidle")
-        await page.wait_for_timeout(1000)
+        # Navigate (using domcontentloaded for robust live web scraping & recording)
+        await page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
+        await page.wait_for_timeout(1500)
 
         # Inject HUD and affiliate banner
-        await page.evaluate(INJECTED_OVERLAY_SCRIPT)
-        if affiliate_banner:
-            await page.evaluate(f"window.__showAffiliate({repr(affiliate_banner)})")
+        try:
+            await page.evaluate(INJECTED_OVERLAY_SCRIPT)
+            if affiliate_banner:
+                await page.evaluate(f"window.__showAffiliate({repr(affiliate_banner)})")
+        except Exception:
+            pass
 
         # Execute all steps
         for step in steps:
-            await _execute_action(page, step)
+            await _execute_action(page, step, affiliate_banner=affiliate_banner)
 
         # Buffer end
         await page.wait_for_timeout(1500)
