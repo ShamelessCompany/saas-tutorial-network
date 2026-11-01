@@ -1,0 +1,12 @@
+[Unit]
+Description=Red de Tutoriales SaaS (P3): lunes, miércoles y viernes de madrugada
+
+[Timer]
+# Hora de Bogotá, de madrugada para no chocar con el trabajo diurno de la Fábrica
+OnCalendar=Mon,Wed,Fri 03:00 America/Bogota
+# Si la VM estaba apagada a esa hora (auto-apagado), corre al encender
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

@@ -193,27 +193,18 @@ steps:
 
 ---
 
-## 🌐 Despliegue en la Nube (DigitalOcean Droplet)
+## 🌐 Despliegue en la Nube (Azure)
 
-Para ejecutar este generador de forma desatendida y programada en un Droplet de DigitalOcean (Ubuntu 24.04):
+P3 se monta en la **misma VM de Azure que la Fábrica de Contenido (P2)**, con su propio usuario y un timer de systemd (lunes, miércoles y viernes de madrugada). Guía completa: [`deploy/azure/README_AZURE.md`](deploy/azure/README_AZURE.md).
 
-1. **Instalar paquetes del sistema:**
-   ```bash
-   sudo apt update && sudo apt install -y python3-pip python3-venv ffmpeg xvfb
-   ```
-2. **Clonar repositorio e instalar:**
-   ```bash
-   git clone <URL_DE_TU_REPOSITORIO> SaaSTutorialNetwork
-   cd SaaSTutorialNetwork
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   playwright install --with-deps chromium
-   ```
-3. **Ejecución desatendida vía Cron (Ej: 3 tutoriales semanales):**
-   ```bash
-   0 9 * * 1,3,5 cd /root/SaaSTutorialNetwork && .venv/bin/python run_demo.py >> /var/log/tutorial_cron.log 2>&1
-   ```
+```powershell
+deploy\azure\subir_codigo.ps1     # instala o actualiza en /opt/tutoriales (arranca en simulación)
+deploy\azure\subir_secretos.ps1   # credentials\client_secret.json y token.json
+deploy\azure\encolar.ps1 config\clickbank_affiliate.yaml
+deploy\azure\modo.ps1 -Publicar   # cuando quieras subir a YouTube de verdad
+```
+
+> El crédito de DigitalOcean ya no forma parte del GitHub Student Pack; por eso el despliegue pasó a Azure.
 
 ---
 
@@ -242,25 +233,8 @@ El proyecto incluye el motor `src/agent_worker.py` y el módulo de subida direct
   python src/agent_worker.py --interval 8.0
   ```
 
-### 3. Despliegue como Servicio Systemd en DigitalOcean / Ubuntu VPS
-Para que el agente se ejecute permanentemente 24/7 y reinicie automáticamente ante reinicios o caídas:
-
-1. **Instalar dependencias del sistema en el Droplet:**
-   ```bash
-   sudo apt update && sudo apt install -y python3-pip python3-venv ffmpeg xvfb
-   ```
-2. **Copiar el servicio:**
-   ```bash
-   sudo cp deploy/saas-agent.service /etc/systemd/system/saas-agent.service
-   sudo systemctl daemon-reload
-   sudo systemctl enable saas-agent
-   sudo systemctl start saas-agent
-   ```
-3. **Monitorear el estado y los logs en vivo:**
-   ```bash
-   sudo systemctl status saas-agent
-   journalctl -u saas-agent -f
-   ```
+### 3. Despliegue como servicio
+En la VM no se usa el bucle 24/7 (`--interval`), sino `deploy/tutoriales.timer`, que lanza `deploy/ejecutar_ciclo.sh` una vez por tanda. Ese script corre en simulación salvo que `.env` tenga `PUBLICAR=1`, y nunca publica con la cola vacía. Ver [`deploy/azure/README_AZURE.md`](deploy/azure/README_AZURE.md).
 
 ### 4. Gestión de Cuota de YouTube Data API
 - Google otorga una cuota gratuita estándar de **10,000 unidades por día**.

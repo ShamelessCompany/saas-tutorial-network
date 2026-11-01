@@ -1,0 +1,21 @@
+[Unit]
+Description=Red de Tutoriales SaaS (P3): un ciclo de grabación, render y publicación
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=tutoriales
+Group=tutoriales
+WorkingDirectory=/opt/tutoriales/app
+Environment=PYTHONUNBUFFERED=1
+Environment=PLAYWRIGHT_BROWSERS_PATH=/opt/tutoriales/ms-playwright
+ExecStart=/opt/tutoriales/app/deploy/ejecutar_ciclo.sh
+TimeoutStartSec=2h
+# Comparte VM con la Fábrica (P2): menos prioridad y un techo de memoria para no tumbarla
+Nice=15
+CPUWeight=20
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+MemoryHigh=1200M
+MemoryMax=1500M
