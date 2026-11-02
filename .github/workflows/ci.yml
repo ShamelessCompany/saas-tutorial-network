@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dependencias
+        run: pip install -r requirements.txt pytest
+      - name: Compila
+        run: python -m compileall -q src run_demo.py record_url.py
+      - name: Tests
+        run: python -m pytest -q tests
+      - name: Script de la VM (sintaxis)
+        run: |
+          bash -n deploy/instalar.sh
+          bash -n deploy/ejecutar_ciclo.sh
+          bash -n deploy/actualizar.sh
