@@ -33,3 +33,26 @@ jobs:
           bash -n deploy/instalar.sh
           bash -n deploy/ejecutar_ciclo.sh
           bash -n deploy/actualizar.sh
+
+  # La producción va a Oracle Always Free (Ampere, aarch64): la demo completa tiene que funcionar en ARM
+  arm64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dependencias
+        run: pip install -r requirements.txt pytest
+      - name: Chromium de Playwright
+        run: python -m playwright install --with-deps chromium
+      - name: Tests
+        run: python -m pytest -q tests
+      - name: Demo completa (voz, grabación 16:9 y 9:16, render)
+        run: |
+          python run_demo.py
+          ls -l output/*.mp4
+          test -s output/default_workflow_16x9_youtube.mp4
+          test -s output/default_workflow_9x16_shorts.mp4
